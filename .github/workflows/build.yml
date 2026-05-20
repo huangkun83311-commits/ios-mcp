@@ -29,4 +29,4 @@ jobs:
       - name: Build
         run: |
           chmod +x build.sh
-          printf "3\n1\n" | ./build.sh
+          printf "2\n1\n" | ./build.sh
