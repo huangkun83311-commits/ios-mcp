@@ -1,0 +1,32 @@
+name: Build iOS MCP
+
+on:
+  push:
+    branches: [ "main" ]
+  workflow_dispatch:
+
+jobs:
+  build:
+    name: Build
+    runs-on: macos-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: 安装 Theos
+        run: |
+          export THEOS=~/theos
+          brew install ldid make 2>/dev/null || true
+          git clone --recursive https://github.com/theos/theos.git $THEOS
+          LDID_PATH=$(which ldid || find /opt/homebrew -name "ldid" | head -1)
+          [ -n "$LDID_PATH" ] && cp "$LDID_PATH" $THEOS/bin/
+          mkdir -p $THEOS/sdks
+          ln -s /Applications/Xcode.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS.sdk $THEOS/sdks/iPhoneOS.sdk
+          echo "THEOS=$THEOS" >> $GITHUB_ENV
+          echo "$THEOS/bin" >> $GITHUB_PATH
+
+      - name: Build
+        run: |
+          chmod +x build.sh
+          printf "3\n1\n" | ./build.sh
